@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="./css/button.css">
+    <link rel="stylesheet" type="text/css" href="./css/backgroundbutton.css">
+    <link rel="shortcut icon" type="image/x-icon" href="./icon.png">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김천 네컷</title>
+    <style>
+        /* 폰트 적용 */
+        @font-face {
+            font-family: "SeguSegu-Regular";
+            src: url("./SeguSegu-Regular.woff") format("woff");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* body태그 자체에 css 요소 적용 */
+        body {
+            font-family: "SeguSegu-Regular";
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 390px;
+            background-image: url("./background1.png");
+            height: 100%;
+        }
+
+        .photos {
+            margin-top: 30px;
+        }
+
+        .photo-frame {
+            background-color: white;
+            margin: 15px 20px;
+            height: 200px;
+            background-size: cover;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .f-title {
+            color: black;
+            font-size: 45px;
+            font-weight: 900;
+        }
+
+        .f-date {
+            color: black;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .photo_description {
+            color: white;
+            background-color: black;
+            width: fit-content;
+            padding: 0 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            position: absolute;
+            bottom: 0;
+            transform: translate(-50%);
+            left: 50%;
+            opacity: 0;
+        }
+
+        .video {
+            width: 100%;
+            height: 100%;
+        }
+
+        .showText {
+            opacity: 0;
+        }
+
+        .hideText {
+            opacity: 1;
+            transition: opacity 0.5s linear;
+        }
+
+        #videoElement {
+            display: none;
+        }
+
+        #captureButton {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="capture_area">
+        <div class="photos">
+            <div id="image1" class="photo-frame"
+                onmouseover="hideText(1)"
+                onmouseout="showText(1)"
+                onclick="startCamera(1)"
+            >
+                <span id="desc1" class="photo_description">
+                    첫번째 사진 :)
+                </span>
+            </div>
+            <div id="image2" class="photo-frame"
+                onmouseover="hideText(2)"
+                onmouseout="showText(2)"
+                onclick="startCamera(2)"
+            >
+                <span id="desc2" class="photo_description">
+                    두번째 사진 :)
+                </span>
+            </div>
+            <div id="image3" class="photo-frame"
+                onmouseover="hideText(3)"
+                onmouseout="showText(3)"
+                onclick="startCamera(3)"
+            >
+                <span id="desc3" class="photo_description">
+                    세번째 사진 :)
+                </span>
+            </div>
+            <div id="image4" class="photo-frame"
+                onmouseover="hideText(4)"
+                onmouseout="showText(4)"
+                onclick="startCamera(4)"
+            >
+                <span id="desc4" class="photo_description">
+                    네번째 사진 :)
+                </span>
+            </div>
+        </div>
+        <div class="footer">
+            <p class="f-title">김천 네컷</p>
+            <p class="f-date" id="current-date"></p>
+        </div>
+    </div>
+    <div class="backgroundbuttons">
+        <button onclick="changeBackground('background1.png')">배경 1</button>
+        <button onclick="changeBackground('background2.png')">배경 2</button>
+        <button onclick="changeBackground('background3.png')">배경 3</button>
+        <button onclick="changeBackground('background4.png')">배경 4</button>
+    </div>
+    <video id="videoElement" autoplay></video>
+    <button id="captureButton" class="bubbly-button" onclick="capturePhoto()">📷사진 촬영📷</button>
+
+    <script>
+        // 현재 날짜를 가져오기
+        var currentDate = new Date();
+
+        // 날짜를 YYYY.MM.DD 형식으로 포맷팅
+        var formattedDate = currentDate.getFullYear() + '.' +
+            ('0' + (currentDate.getMonth() + 1)).slice(-2) + '.' +
+            ('0' + currentDate.getDate()).slice(-2);
+
+        // id가 "current-date"인 요소를 가져와서 포맷된 날짜로 업데이트
+        document.getElementById('current-date').textContent = formattedDate;
+
+        function hideText(id) {
+            document.getElementById('desc' + id).classList.add('hideText');
+        }
+
+        function showText(id) {
+            document.getElementById('desc' + id).classList.remove('hideText');
+        }
+
+        let currentImageId;
+        
+        //카메라 실행
+        function startCamera(id) {
+            currentImageId = id;
+            const video = document.getElementById('videoElement');
+            const captureButton = document.getElementById('captureButton');
+            video.style.display = 'block';
+            captureButton.style.display = 'block';
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error("Error accessing the camera: ", err);
+                });
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('videoElement');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageDataUrl = canvas.toDataURL('image/png');
+            document.getElementById('image' + currentImageId).style.backgroundImage = `url(${imageDataUrl})`;
+
+            const stream = video.srcObject;
+            const tracks = stream.getTracks();
+
+            tracks.forEach(track => {
+                track.stop();
+            });
+
+            video.style.display = 'none';
+            document.getElementById('captureButton').style.display = 'none';
+        }
+
+        function captureAndSave() {
+            const captureArea = document.getElementById('capture_area');
+            html2canvas(captureArea).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'capture.png';
+                link.click();
+            });
+        }
+    </script>
+    <script>
+        // 배경 변경 스크립트
+        function changeBackground(backgroundImage) {
+            const container = document.querySelector('.container');
+            container.style.backgroundImage = `url(${backgroundImage})`;
+        }
+    </script>    
+    <script src="button.js"></script>
+</body>
+</html>
